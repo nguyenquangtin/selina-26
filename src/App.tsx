@@ -47,7 +47,7 @@ const CONFIG = {
     elements: 200,    // 圣诞元素数量
     lights: 400       // 彩灯数量
   },
-  tree: { height: 22, radius: 9 }, // 树体尺寸
+  heart: { scale: 9 }, // 心形尺寸
   photos: {
     // top 属性不再需要，因为已经移入 body
     body: bodyPhotoPaths
@@ -79,13 +79,23 @@ const FoliageMaterial = shaderMaterial(
 );
 extend({ FoliageMaterial });
 
-// --- Helper: Tree Shape ---
-const getTreePosition = () => {
-  const h = CONFIG.tree.height; const rBase = CONFIG.tree.radius;
-  const y = (Math.random() * h) - (h / 2); const normalizedY = (y + (h/2)) / h;
-  const currentRadius = rBase * (1 - normalizedY); const theta = Math.random() * Math.PI * 2;
-  const r = Math.random() * currentRadius;
-  return [r * Math.cos(theta), y, r * Math.sin(theta)];
+// --- Helper: Heart Shape ---
+// Implicit 2D heart equation: (x²+y²-1)³ ≤ x²y³
+const isInsideHeart = (nx: number, ny: number): boolean => {
+  const a = nx*nx + ny*ny - 1;
+  return a*a*a - nx*nx * ny*ny*ny <= 0;
+};
+const getHeartPosition = (): [number, number, number] => {
+  const s = CONFIG.heart.scale;
+  for (let i = 0; i < 200; i++) {
+    const nx = (Math.random() - 0.5) * 2.6;   // x range ~-1.3 to 1.3
+    const ny = (Math.random() - 0.5) * 2.4 + 0.1; // y range ~-1.1 to 1.3
+    if (isInsideHeart(nx, ny)) {
+      const nz = (Math.random() - 0.5) * 1.0;
+      return [nx * s, ny * s, nz * s];
+    }
+  }
+  return [0, 0, 0];
 };
 
 // --- Component: Foliage ---
@@ -97,7 +107,7 @@ const Foliage = ({ state }: { state: 'CHAOS' | 'FORMED' }) => {
     const spherePoints = random.inSphere(new Float32Array(count * 3), { radius: 25 }) as Float32Array;
     for (let i = 0; i < count; i++) {
       positions[i*3] = spherePoints[i*3]; positions[i*3+1] = spherePoints[i*3+1]; positions[i*3+2] = spherePoints[i*3+2];
-      const [tx, ty, tz] = getTreePosition();
+      const [tx, ty, tz] = getHeartPosition();
       targetPositions[i*3] = tx; targetPositions[i*3+1] = ty; targetPositions[i*3+2] = tz;
       randoms[i] = Math.random();
     }
@@ -135,11 +145,8 @@ const PhotoOrnaments = ({ state }: { state: 'CHAOS' | 'FORMED' }) => {
   const data = useMemo(() => {
     return new Array(count).fill(0).map((_, i) => {
       const chaosPos = new THREE.Vector3((Math.random()-0.5)*70, (Math.random()-0.5)*70, (Math.random()-0.5)*70);
-      const h = CONFIG.tree.height; const y = (Math.random() * h) - (h / 2);
-      const rBase = CONFIG.tree.radius;
-      const currentRadius = (rBase * (1 - (y + (h/2)) / h)) + 0.5;
-      const theta = Math.random() * Math.PI * 2;
-      const targetPos = new THREE.Vector3(currentRadius * Math.cos(theta), y, currentRadius * Math.sin(theta));
+      const [hx, hy, hz] = getHeartPosition();
+      const targetPos = new THREE.Vector3(hx, hy, hz);
 
       const isBig = Math.random() < 0.2;
       const baseScale = isBig ? 2.2 : 0.8 + Math.random() * 0.6;
@@ -245,13 +252,8 @@ const ChristmasElements = ({ state }: { state: 'CHAOS' | 'FORMED' }) => {
   const data = useMemo(() => {
     return new Array(count).fill(0).map(() => {
       const chaosPos = new THREE.Vector3((Math.random()-0.5)*60, (Math.random()-0.5)*60, (Math.random()-0.5)*60);
-      const h = CONFIG.tree.height;
-      const y = (Math.random() * h) - (h / 2);
-      const rBase = CONFIG.tree.radius;
-      const currentRadius = (rBase * (1 - (y + (h/2)) / h)) * 0.95;
-      const theta = Math.random() * Math.PI * 2;
-
-      const targetPos = new THREE.Vector3(currentRadius * Math.cos(theta), y, currentRadius * Math.sin(theta));
+      const [hx, hy, hz] = getHeartPosition();
+      const targetPos = new THREE.Vector3(hx, hy, hz);
 
       const type = Math.floor(Math.random() * 3);
       let color; let scale = 1;
@@ -297,9 +299,8 @@ const FairyLights = ({ state }: { state: 'CHAOS' | 'FORMED' }) => {
   const data = useMemo(() => {
     return new Array(count).fill(0).map(() => {
       const chaosPos = new THREE.Vector3((Math.random()-0.5)*60, (Math.random()-0.5)*60, (Math.random()-0.5)*60);
-      const h = CONFIG.tree.height; const y = (Math.random() * h) - (h / 2); const rBase = CONFIG.tree.radius;
-      const currentRadius = (rBase * (1 - (y + (h/2)) / h)) + 0.3; const theta = Math.random() * Math.PI * 2;
-      const targetPos = new THREE.Vector3(currentRadius * Math.cos(theta), y, currentRadius * Math.sin(theta));
+      const [hx, hy, hz] = getHeartPosition();
+      const targetPos = new THREE.Vector3(hx, hy, hz);
       const color = CONFIG.colors.lights[Math.floor(Math.random() * CONFIG.colors.lights.length)];
       const speed = 2 + Math.random() * 3;
       return { chaosPos, targetPos, color, speed, currentPos: chaosPos.clone(), timeOffset: Math.random() * 100 };
@@ -371,7 +372,7 @@ const TopStar = ({ state }: { state: 'CHAOS' | 'FORMED' }) => {
   });
 
   return (
-    <group ref={groupRef} position={[0, CONFIG.tree.height / 2 + 1.8, 0]}>
+    <group ref={groupRef} position={[0, CONFIG.heart.scale * 1.1 + 1, 0]}>
       <Float speed={2} rotationIntensity={0.2} floatIntensity={0.2}>
         <mesh geometry={starGeometry} material={goldMaterial} />
       </Float>
