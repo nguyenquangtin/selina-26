@@ -361,13 +361,27 @@ const TopStar = ({ state }: { state: 'CHAOS' | 'FORMED' }) => {
     depth: 0.5, bevelEnabled: true, bevelThickness: 0.12, bevelSize: 0.1, bevelSegments: 4,
   }), [heartShape]);
 
-  // Rose gold material — glowing romantic
-  const roseMaterial = useMemo(() => new THREE.MeshStandardMaterial({
+  // Neon transparent fill
+  const neonFillMaterial = useMemo(() => new THREE.MeshStandardMaterial({
     color: '#FF69B4',
     emissive: '#FF1493',
-    emissiveIntensity: 2.0,
-    roughness: 0.1,
-    metalness: 0.8,
+    emissiveIntensity: 3.0,
+    roughness: 0,
+    metalness: 0,
+    transparent: true,
+    opacity: 0.18,
+    side: THREE.DoubleSide,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+  }), []);
+
+  // Neon wireframe outline for glowing edge
+  const neonWireMaterial = useMemo(() => new THREE.MeshBasicMaterial({
+    color: '#FF1493',
+    wireframe: true,
+    transparent: true,
+    opacity: 0.55,
+    blending: THREE.AdditiveBlending,
   }), []);
 
   useFrame((_, delta) => {
@@ -381,7 +395,13 @@ const TopStar = ({ state }: { state: 'CHAOS' | 'FORMED' }) => {
   return (
     <group ref={groupRef} position={[0, CONFIG.heart.scale * 1.1 + 1, 0]}>
       <Float speed={2} rotationIntensity={0} floatIntensity={0.3}>
-        <mesh geometry={heartGeometry} material={roseMaterial} />
+        {/* Transparent neon fill */}
+        <mesh geometry={heartGeometry} material={neonFillMaterial} />
+        {/* Glowing wireframe edge */}
+        <mesh geometry={heartGeometry} material={neonWireMaterial} />
+        {/* Sparkles orbiting the heart */}
+        <Sparkles count={40} scale={3.5} size={6} speed={0.6} opacity={0.9} color="#FF69B4" />
+        <Sparkles count={20} scale={2.5} size={10} speed={0.3} opacity={0.7} color="#FFB6C1" />
       </Float>
     </group>
   );
