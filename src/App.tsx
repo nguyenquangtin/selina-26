@@ -372,7 +372,7 @@ const TopStar = ({ state }: { state: 'CHAOS' | 'FORMED' }) => {
 
   useFrame((_, delta) => {
     if (groupRef.current) {
-      groupRef.current.rotation.z += delta * 0.4;
+      groupRef.current.rotation.y += delta * 0.4; // rotate left-to-right only
       const targetScale = state === 'FORMED' ? 1 : 0;
       groupRef.current.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), delta * 3);
     }
@@ -380,7 +380,7 @@ const TopStar = ({ state }: { state: 'CHAOS' | 'FORMED' }) => {
 
   return (
     <group ref={groupRef} position={[0, CONFIG.heart.scale * 1.1 + 1, 0]}>
-      <Float speed={2} rotationIntensity={0.15} floatIntensity={0.3}>
+      <Float speed={2} rotationIntensity={0} floatIntensity={0.3}>
         <mesh geometry={heartGeometry} material={roseMaterial} />
       </Float>
     </group>
@@ -527,8 +527,14 @@ export default function GrandTreeApp() {
       </div>
       <GestureController onGesture={setSceneState} onMove={setRotationSpeed} onStatus={setAiStatus} debugMode={debugMode} />
 
-      {/* UI - Birthday Greeting */}
-      <div style={{ position: 'absolute', top: '20px', left: '50%', transform: 'translateX(-50%)', zIndex: 10, textAlign: 'center', pointerEvents: 'none', whiteSpace: 'nowrap' }}>
+      {/* UI - Birthday Greeting — fades in only when heart is formed */}
+      <div style={{
+        position: 'absolute', top: '20px', left: '50%',
+        transform: `translateX(-50%) translateY(${sceneState === 'FORMED' ? '0px' : '-12px'})`,
+        zIndex: 10, textAlign: 'center', pointerEvents: 'none', whiteSpace: 'nowrap',
+        opacity: sceneState === 'FORMED' ? 1 : 0,
+        transition: 'opacity 1.8s ease-in-out, transform 1.8s ease-out',
+      }}>
         <p style={{ fontFamily: "'Great Vibes', cursive", fontSize: '42px', color: '#FFB6C1', margin: 0, textShadow: '0 0 20px rgba(255,105,180,0.8), 0 0 40px rgba(255,20,147,0.5)', lineHeight: 1.2 }}>
           Happy Birthday, Selina
         </p>
