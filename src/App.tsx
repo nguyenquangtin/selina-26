@@ -537,7 +537,6 @@ export default function GrandTreeApp() {
   const [sceneState, setSceneState] = useState<'CHAOS' | 'FORMED'>('CHAOS');
   const [rotationSpeed, setRotationSpeed] = useState(0);
   const [aiStatus, setAiStatus] = useState("INITIALIZING...");
-  const [debugMode, setDebugMode] = useState(false);
 
   return (
     <div style={{ width: '100vw', height: '100vh', backgroundColor: '#000', position: 'relative', overflow: 'hidden' }}>
@@ -546,31 +545,29 @@ export default function GrandTreeApp() {
             <Experience sceneState={sceneState} rotationSpeed={rotationSpeed} />
         </Canvas>
       </div>
-      <GestureController onGesture={setSceneState} onMove={setRotationSpeed} onStatus={setAiStatus} debugMode={debugMode} />
+      <GestureController onGesture={setSceneState} onMove={setRotationSpeed} onStatus={setAiStatus} debugMode={false} />
 
       {/* UI - Birthday Greeting — fades in only when heart is formed */}
       <div style={{
         position: 'absolute', top: '28%', left: '50%',
         transform: `translateX(-50%) translateY(${sceneState === 'FORMED' ? '0px' : '-12px'})`,
-        zIndex: 10, textAlign: 'center', pointerEvents: 'none', whiteSpace: 'nowrap',
+        zIndex: 10, textAlign: 'center', pointerEvents: 'none',
+        width: '90vw', maxWidth: '600px',
         opacity: sceneState === 'FORMED' ? 1 : 0,
         transition: 'opacity 1.8s ease-in-out, transform 1.8s ease-out',
       }}>
-        <p className="romantic-glow" style={{ fontFamily: "'Great Vibes', cursive", fontSize: '52px', color: '#FFD5E5', margin: 0, lineHeight: 1.2 }}>
+        <p className="romantic-glow" style={{ fontFamily: "'Great Vibes', cursive", fontSize: 'clamp(30px, 8vw, 52px)', color: '#FFD5E5', margin: 0, lineHeight: 1.2 }}>
           Happy Birthday, Selina
         </p>
-        <p style={{ fontFamily: "'Cormorant Infant', serif", fontStyle: 'italic', fontSize: '15px', color: 'rgba(255,182,193,0.75)', letterSpacing: '4px', margin: '6px 0 0 0', textShadow: '0 0 12px rgba(255,105,180,0.5)' }}>
+        <p style={{ fontFamily: "'Cormorant Infant', serif", fontStyle: 'italic', fontSize: 'clamp(11px, 2.5vw, 15px)', color: 'rgba(255,182,193,0.75)', letterSpacing: '4px', margin: '6px 0 0 0', textShadow: '0 0 12px rgba(255,105,180,0.5)' }}>
           with all my love
         </p>
       </div>
 
-      {/* UI - Buttons */}
-      <div style={{ position: 'absolute', bottom: '30px', right: '40px', zIndex: 10, display: 'flex', gap: '10px' }}>
-        <button onClick={() => setDebugMode(!debugMode)} style={{ padding: '12px 15px', backgroundColor: debugMode ? '#FF69B4' : 'rgba(0,0,0,0.5)', border: '1px solid #FF69B4', color: debugMode ? '#000' : '#FF69B4', fontFamily: 'sans-serif', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer', backdropFilter: 'blur(4px)' }}>
-           {debugMode ? 'HIDE DEBUG' : 'DEBUG'}
-        </button>
-        <button className="romantic-btn" onClick={() => setSceneState(s => s === 'CHAOS' ? 'FORMED' : 'CHAOS')} style={{ padding: '12px 34px', backgroundColor: 'rgba(20,0,15,0.6)', border: '1px solid rgba(255,105,180,0.55)', color: '#FFD5E5', fontFamily: "'Cormorant Infant', serif", fontStyle: 'italic', fontSize: '17px', fontWeight: '600', letterSpacing: '2px', cursor: 'pointer', backdropFilter: 'blur(8px)', borderRadius: '2px' }}>
-           {sceneState === 'CHAOS' ? 'Bloom Heart' : 'Scatter Love'}
+      {/* UI - Centered button */}
+      <div style={{ position: 'absolute', bottom: '30px', left: '50%', transform: 'translateX(-50%)', zIndex: 10 }}>
+        <button className="romantic-btn" onClick={() => setSceneState(s => s === 'CHAOS' ? 'FORMED' : 'CHAOS')} style={{ padding: 'clamp(10px,2.5vw,12px) clamp(24px,6vw,40px)', backgroundColor: 'rgba(20,0,15,0.6)', border: '1px solid rgba(255,105,180,0.55)', color: '#FFD5E5', fontFamily: "'Cormorant Infant', serif", fontStyle: 'italic', fontSize: 'clamp(14px,3.5vw,17px)', fontWeight: '600', letterSpacing: '2px', cursor: 'pointer', backdropFilter: 'blur(8px)', borderRadius: '2px', whiteSpace: 'nowrap' }}>
+          {sceneState === 'CHAOS' ? 'Bloom Heart' : 'Scatter Love'}
         </button>
       </div>
 
