@@ -27,19 +27,19 @@ const bodyPhotoPaths = [
 // --- 视觉配置 ---
 const CONFIG = {
   colors: {
-    emerald: '#004225', // 纯正祖母绿
-    gold: '#FFD700',
-    silver: '#ECEFF1',
-    red: '#D32F2F',
-    green: '#2E7D32',
-    white: '#FFFFFF',   // 纯白色
-    warmLight: '#FFD54F',
-    lights: ['#FF0000', '#00FF00', '#0000FF', '#FFFF00'], // 彩灯
-    // 拍立得边框颜色池 (复古柔和色系)
-    borders: ['#FFFAF0', '#F0E68C', '#E6E6FA', '#FFB6C1', '#98FB98', '#87CEFA', '#FFDAB9'],
-    // 圣诞元素颜色
-    giftColors: ['#D32F2F', '#FFD700', '#1976D2', '#2E7D32'],
-    candyColors: ['#FF0000', '#FFFFFF']
+    emerald: '#8B0033',  // deep rose (foliage particles)
+    gold: '#FFB6C1',     // rose gold (accents)
+    silver: '#FFD5E5',   // blush pink (sparkles)
+    red: '#FF0055',      // valentine red
+    green: '#C71585',    // medium violet-red
+    white: '#FFFFFF',
+    warmLight: '#FF6B9D', // warm pink light
+    lights: ['#FF6B9D', '#FF1493', '#FFB6C1', '#FF85B3', '#E91E8C'], // pink fairy lights
+    // polaroid border colors — soft romantic palette
+    borders: ['#FFF0F3', '#FFE4E8', '#FFDDE5', '#FFD0DC', '#FFB6C1', '#FFC0CB', '#FFD5E5'],
+    // valentine element colors
+    giftColors: ['#FF1493', '#FF69B4', '#E91E8C', '#C71585'],
+    candyColors: ['#FF1493', '#FFFFFF']
   },
   counts: {
     foliage: 15000,
@@ -56,7 +56,7 @@ const CONFIG = {
 
 // --- Shader Material (Foliage) ---
 const FoliageMaterial = shaderMaterial(
-  { uTime: 0, uColor: new THREE.Color(CONFIG.colors.emerald), uProgress: 0 },
+  { uTime: 0, uColor: new THREE.Color(CONFIG.colors.emerald), uProgress: 0 },  // deep rose particles
   `uniform float uTime; uniform float uProgress; attribute vec3 aTargetPos; attribute float aRandom;
   varying vec2 vUv; varying float vMix;
   float cubicInOut(float t) { return t < 0.5 ? 4.0 * t * t * t : 0.5 * pow(2.0 * t - 2.0, 3.0) + 1.0; }
@@ -247,7 +247,11 @@ const ChristmasElements = ({ state }: { state: 'CHAOS' | 'FORMED' }) => {
 
   const boxGeometry = useMemo(() => new THREE.BoxGeometry(0.8, 0.8, 0.8), []);
   const sphereGeometry = useMemo(() => new THREE.SphereGeometry(0.5, 16, 16), []);
-  const caneGeometry = useMemo(() => new THREE.CylinderGeometry(0.15, 0.15, 1.2, 8), []);
+  // Small floating hearts replace candy canes
+  const heartMiniShape = useMemo(() => createHeartShape(0.38), []);
+  const caneGeometry = useMemo(() => new THREE.ExtrudeGeometry(heartMiniShape, {
+    depth: 0.15, bevelEnabled: false,
+  }), [heartMiniShape]);
 
   const data = useMemo(() => {
     return new Array(count).fill(0).map(() => {
@@ -331,41 +335,44 @@ const FairyLights = ({ state }: { state: 'CHAOS' | 'FORMED' }) => {
   );
 };
 
-// --- Component: Top Star (No Photo, Pure Gold 3D Star) ---
+// --- Helper: Parametric heart shape using sin³/cos formula ---
+const createHeartShape = (s: number): THREE.Shape => {
+  const shape = new THREE.Shape();
+  const n = 120;
+  for (let i = 0; i <= n; i++) {
+    const t = (i / n) * Math.PI * 2;
+    const x = Math.pow(Math.sin(t), 3) * s;
+    // Normalize y from parametric range (-17 to ~10.5) to (-s to s)
+    const rawY = 13*Math.cos(t) - 5*Math.cos(2*t) - 2*Math.cos(3*t) - Math.cos(4*t);
+    const y = ((rawY + 3.25) / 13.75) * s;
+    if (i === 0) shape.moveTo(x, y); else shape.lineTo(x, y);
+  }
+  shape.closePath();
+  return shape;
+};
+
+// --- Component: Top Heart (Rose Gold 3D Heart) ---
 const TopStar = ({ state }: { state: 'CHAOS' | 'FORMED' }) => {
   const groupRef = useRef<THREE.Group>(null);
 
-  const starShape = useMemo(() => {
-    const shape = new THREE.Shape();
-    const outerRadius = 1.3; const innerRadius = 0.7; const points = 5;
-    for (let i = 0; i < points * 2; i++) {
-      const radius = i % 2 === 0 ? outerRadius : innerRadius;
-      const angle = (i / (points * 2)) * Math.PI * 2 - Math.PI / 2;
-      i === 0 ? shape.moveTo(radius*Math.cos(angle), radius*Math.sin(angle)) : shape.lineTo(radius*Math.cos(angle), radius*Math.sin(angle));
-    }
-    shape.closePath();
-    return shape;
-  }, []);
+  const heartShape = useMemo(() => createHeartShape(1.4), []);
 
-  const starGeometry = useMemo(() => {
-    return new THREE.ExtrudeGeometry(starShape, {
-      depth: 0.4, // 增加一点厚度
-      bevelEnabled: true, bevelThickness: 0.1, bevelSize: 0.1, bevelSegments: 3,
-    });
-  }, [starShape]);
+  const heartGeometry = useMemo(() => new THREE.ExtrudeGeometry(heartShape, {
+    depth: 0.5, bevelEnabled: true, bevelThickness: 0.12, bevelSize: 0.1, bevelSegments: 4,
+  }), [heartShape]);
 
-  // 纯金材质
-  const goldMaterial = useMemo(() => new THREE.MeshStandardMaterial({
-    color: CONFIG.colors.gold,
-    emissive: CONFIG.colors.gold,
-    emissiveIntensity: 1.5, // 适中亮度，既发光又有质感
+  // Rose gold material — glowing romantic
+  const roseMaterial = useMemo(() => new THREE.MeshStandardMaterial({
+    color: '#FF69B4',
+    emissive: '#FF1493',
+    emissiveIntensity: 2.0,
     roughness: 0.1,
-    metalness: 1.0,
+    metalness: 0.8,
   }), []);
 
   useFrame((_, delta) => {
     if (groupRef.current) {
-      groupRef.current.rotation.y += delta * 0.5;
+      groupRef.current.rotation.z += delta * 0.4;
       const targetScale = state === 'FORMED' ? 1 : 0;
       groupRef.current.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), delta * 3);
     }
@@ -373,8 +380,8 @@ const TopStar = ({ state }: { state: 'CHAOS' | 'FORMED' }) => {
 
   return (
     <group ref={groupRef} position={[0, CONFIG.heart.scale * 1.1 + 1, 0]}>
-      <Float speed={2} rotationIntensity={0.2} floatIntensity={0.2}>
-        <mesh geometry={starGeometry} material={goldMaterial} />
+      <Float speed={2} rotationIntensity={0.15} floatIntensity={0.3}>
+        <mesh geometry={heartGeometry} material={roseMaterial} />
       </Float>
     </group>
   );
@@ -395,14 +402,14 @@ const Experience = ({ sceneState, rotationSpeed }: { sceneState: 'CHAOS' | 'FORM
       <PerspectiveCamera makeDefault position={[0, 8, 60]} fov={45} />
       <OrbitControls ref={controlsRef} enablePan={false} enableZoom={true} minDistance={30} maxDistance={120} autoRotate={rotationSpeed === 0 && sceneState === 'FORMED'} autoRotateSpeed={0.3} maxPolarAngle={Math.PI / 1.7} />
 
-      <color attach="background" args={['#000300']} />
-      <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
+      <color attach="background" args={['#050005']} />
+      <Stars radius={100} depth={50} count={5000} factor={4} saturation={0.6} fade speed={0.8} />
       <Environment preset="night" background={false} />
 
-      <ambientLight intensity={0.4} color="#003311" />
-      <pointLight position={[30, 30, 30]} intensity={100} color={CONFIG.colors.warmLight} />
-      <pointLight position={[-30, 10, -30]} intensity={50} color={CONFIG.colors.gold} />
-      <pointLight position={[0, -20, 10]} intensity={30} color="#ffffff" />
+      <ambientLight intensity={0.5} color="#330011" />
+      <pointLight position={[30, 30, 30]} intensity={120} color={CONFIG.colors.warmLight} />
+      <pointLight position={[-30, 10, -30]} intensity={60} color="#FF1493" />
+      <pointLight position={[0, -20, 10]} intensity={40} color="#FFB6C1" />
 
       <group position={[0, -6, 0]}>
         <Foliage state={sceneState} />
@@ -412,7 +419,7 @@ const Experience = ({ sceneState, rotationSpeed }: { sceneState: 'CHAOS' | 'FORM
            <FairyLights state={sceneState} />
            <TopStar state={sceneState} />
         </Suspense>
-        <Sparkles count={600} scale={50} size={8} speed={0.4} opacity={0.4} color={CONFIG.colors.silver} />
+        <Sparkles count={600} scale={50} size={8} speed={0.4} opacity={0.5} color="#FF69B4" />
       </group>
 
       <EffectComposer>
@@ -520,34 +527,44 @@ export default function GrandTreeApp() {
       </div>
       <GestureController onGesture={setSceneState} onMove={setRotationSpeed} onStatus={setAiStatus} debugMode={debugMode} />
 
+      {/* UI - Birthday Greeting */}
+      <div style={{ position: 'absolute', top: '20px', left: '50%', transform: 'translateX(-50%)', zIndex: 10, textAlign: 'center', pointerEvents: 'none', whiteSpace: 'nowrap' }}>
+        <p style={{ fontFamily: "'Great Vibes', cursive", fontSize: '42px', color: '#FFB6C1', margin: 0, textShadow: '0 0 20px rgba(255,105,180,0.8), 0 0 40px rgba(255,20,147,0.5)', lineHeight: 1.2 }}>
+          Happy Birthday, Selina
+        </p>
+        <p style={{ fontFamily: "'Cormorant Infant', serif", fontStyle: 'italic', fontSize: '13px', color: 'rgba(255,182,193,0.6)', letterSpacing: '3px', margin: '4px 0 0 0' }}>
+          with all my love
+        </p>
+      </div>
+
       {/* UI - Stats */}
       <div style={{ position: 'absolute', bottom: '30px', left: '40px', color: '#888', zIndex: 10, fontFamily: 'sans-serif', userSelect: 'none' }}>
         <div style={{ marginBottom: '15px' }}>
           <p style={{ fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '4px' }}>Memories</p>
-          <p style={{ fontSize: '24px', color: '#FFD700', fontWeight: 'bold', margin: 0 }}>
+          <p style={{ fontSize: '24px', color: '#FFB6C1', fontWeight: 'bold', margin: 0 }}>
             {CONFIG.counts.ornaments.toLocaleString()} <span style={{ fontSize: '10px', color: '#555', fontWeight: 'normal' }}>POLAROIDS</span>
           </p>
         </div>
         <div>
-          <p style={{ fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '4px' }}>Foliage</p>
-          <p style={{ fontSize: '24px', color: '#004225', fontWeight: 'bold', margin: 0 }}>
-            {(CONFIG.counts.foliage / 1000).toFixed(0)}K <span style={{ fontSize: '10px', color: '#555', fontWeight: 'normal' }}>EMERALD NEEDLES</span>
+          <p style={{ fontSize: '10px', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '4px' }}>Love</p>
+          <p style={{ fontSize: '24px', color: '#8B0033', fontWeight: 'bold', margin: 0 }}>
+            {(CONFIG.counts.foliage / 1000).toFixed(0)}K <span style={{ fontSize: '10px', color: '#555', fontWeight: 'normal' }}>ROSE PETALS</span>
           </p>
         </div>
       </div>
 
       {/* UI - Buttons */}
       <div style={{ position: 'absolute', bottom: '30px', right: '40px', zIndex: 10, display: 'flex', gap: '10px' }}>
-        <button onClick={() => setDebugMode(!debugMode)} style={{ padding: '12px 15px', backgroundColor: debugMode ? '#FFD700' : 'rgba(0,0,0,0.5)', border: '1px solid #FFD700', color: debugMode ? '#000' : '#FFD700', fontFamily: 'sans-serif', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer', backdropFilter: 'blur(4px)' }}>
-           {debugMode ? 'HIDE DEBUG' : '🛠 DEBUG'}
+        <button onClick={() => setDebugMode(!debugMode)} style={{ padding: '12px 15px', backgroundColor: debugMode ? '#FF69B4' : 'rgba(0,0,0,0.5)', border: '1px solid #FF69B4', color: debugMode ? '#000' : '#FF69B4', fontFamily: 'sans-serif', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer', backdropFilter: 'blur(4px)' }}>
+           {debugMode ? 'HIDE DEBUG' : 'DEBUG'}
         </button>
-        <button onClick={() => setSceneState(s => s === 'CHAOS' ? 'FORMED' : 'CHAOS')} style={{ padding: '12px 30px', backgroundColor: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255, 215, 0, 0.5)', color: '#FFD700', fontFamily: 'serif', fontSize: '14px', fontWeight: 'bold', letterSpacing: '3px', textTransform: 'uppercase', cursor: 'pointer', backdropFilter: 'blur(4px)' }}>
-           {sceneState === 'CHAOS' ? 'Assemble Tree' : 'Disperse'}
+        <button onClick={() => setSceneState(s => s === 'CHAOS' ? 'FORMED' : 'CHAOS')} style={{ padding: '12px 30px', backgroundColor: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,105,180,0.5)', color: '#FFB6C1', fontFamily: "'Cormorant Infant', serif", fontStyle: 'italic', fontSize: '16px', fontWeight: '600', letterSpacing: '2px', cursor: 'pointer', backdropFilter: 'blur(4px)' }}>
+           {sceneState === 'CHAOS' ? 'Bloom Heart' : 'Scatter Love'}
         </button>
       </div>
 
       {/* UI - AI Status */}
-      <div style={{ position: 'absolute', top: '20px', left: '50%', transform: 'translateX(-50%)', color: aiStatus.includes('ERROR') ? '#FF0000' : 'rgba(255, 215, 0, 0.4)', fontSize: '10px', letterSpacing: '2px', zIndex: 10, background: 'rgba(0,0,0,0.5)', padding: '4px 8px', borderRadius: '4px' }}>
+      <div style={{ position: 'absolute', top: '110px', left: '50%', transform: 'translateX(-50%)', color: aiStatus.includes('ERROR') ? '#FF0000' : 'rgba(255,105,180,0.35)', fontSize: '10px', letterSpacing: '2px', zIndex: 10, background: 'rgba(0,0,0,0.4)', padding: '4px 8px', borderRadius: '4px', whiteSpace: 'nowrap' }}>
         {aiStatus}
       </div>
     </div>
