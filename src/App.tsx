@@ -212,7 +212,7 @@ const PhotoOrnaments = ({ state }: { state: 'CHAOS' | 'FORMED' }) => {
               <meshStandardMaterial
                 map={textures[obj.textureIndex]}
                 roughness={0.1} metalness={0}
-                emissive={CONFIG.colors.white} emissiveMap={textures[obj.textureIndex]} emissiveIntensity={2.5}
+                emissive={CONFIG.colors.white} emissiveMap={textures[obj.textureIndex]} emissiveIntensity={1.2}
                 side={THREE.FrontSide}
               />
             </mesh>
@@ -226,7 +226,7 @@ const PhotoOrnaments = ({ state }: { state: 'CHAOS' | 'FORMED' }) => {
               <meshStandardMaterial
                 map={textures[obj.textureIndex]}
                 roughness={0.1} metalness={0}
-                emissive={CONFIG.colors.white} emissiveMap={textures[obj.textureIndex]} emissiveIntensity={2.5}
+                emissive={CONFIG.colors.white} emissiveMap={textures[obj.textureIndex]} emissiveIntensity={1.2}
                 side={THREE.FrontSide}
               />
             </mesh>
@@ -444,7 +444,7 @@ const Experience = ({ sceneState, rotationSpeed }: { sceneState: 'CHAOS' | 'FORM
       </group>
 
       <EffectComposer>
-        <Bloom luminanceThreshold={0.6} luminanceSmoothing={0.2} intensity={2.2} radius={0.7} mipmapBlur />
+        <Bloom luminanceThreshold={0.9} luminanceSmoothing={0.1} intensity={1.8} radius={0.5} mipmapBlur />
         <Vignette eskil={false} offset={0.05} darkness={1.4} />
       </EffectComposer>
     </>
@@ -549,7 +549,7 @@ export default function GrandTreeApp() {
 
       {/* UI - Birthday Greeting — fades in only when heart is formed */}
       <div style={{
-        position: 'absolute', top: '28%', left: '50%',
+        position: 'absolute', top: '14%', left: '50%',
         transform: `translateX(-50%) translateY(${sceneState === 'FORMED' ? '0px' : '-12px'})`,
         zIndex: 10, textAlign: 'center', pointerEvents: 'none',
         width: '90vw', maxWidth: '600px',
