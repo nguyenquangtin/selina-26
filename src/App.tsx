@@ -422,14 +422,15 @@ const Experience = ({ sceneState, rotationSpeed }: { sceneState: 'CHAOS' | 'FORM
       <PerspectiveCamera makeDefault position={[0, 8, 60]} fov={45} />
       <OrbitControls ref={controlsRef} enablePan={false} enableZoom={true} minDistance={30} maxDistance={120} autoRotate={rotationSpeed === 0 && sceneState === 'FORMED'} autoRotateSpeed={0.3} maxPolarAngle={Math.PI / 1.7} />
 
-      <color attach="background" args={['#050005']} />
-      <Stars radius={100} depth={50} count={5000} factor={4} saturation={0.6} fade speed={0.8} />
+      <color attach="background" args={['#080008']} />
+      <Stars radius={100} depth={50} count={5000} factor={4} saturation={0.8} fade speed={0.6} />
       <Environment preset="night" background={false} />
 
-      <ambientLight intensity={0.5} color="#330011" />
-      <pointLight position={[30, 30, 30]} intensity={120} color={CONFIG.colors.warmLight} />
-      <pointLight position={[-30, 10, -30]} intensity={60} color="#FF1493" />
-      <pointLight position={[0, -20, 10]} intensity={40} color="#FFB6C1" />
+      <ambientLight intensity={0.6} color="#3D0020" />
+      <pointLight position={[30, 30, 30]} intensity={160} color={CONFIG.colors.warmLight} />
+      <pointLight position={[-30, 10, -30]} intensity={80} color="#FF1493" />
+      <pointLight position={[0, -20, 10]} intensity={50} color="#FFB6C1" />
+      <pointLight position={[0, 20, 20]} intensity={40} color="#FF69B4" />
 
       <group position={[0, -6, 0]}>
         <Foliage state={sceneState} />
@@ -443,8 +444,8 @@ const Experience = ({ sceneState, rotationSpeed }: { sceneState: 'CHAOS' | 'FORM
       </group>
 
       <EffectComposer>
-        <Bloom luminanceThreshold={0.8} luminanceSmoothing={0.1} intensity={1.5} radius={0.5} mipmapBlur />
-        <Vignette eskil={false} offset={0.1} darkness={1.2} />
+        <Bloom luminanceThreshold={0.6} luminanceSmoothing={0.2} intensity={2.2} radius={0.7} mipmapBlur />
+        <Vignette eskil={false} offset={0.05} darkness={1.4} />
       </EffectComposer>
     </>
   );
@@ -555,10 +556,10 @@ export default function GrandTreeApp() {
         opacity: sceneState === 'FORMED' ? 1 : 0,
         transition: 'opacity 1.8s ease-in-out, transform 1.8s ease-out',
       }}>
-        <p style={{ fontFamily: "'Great Vibes', cursive", fontSize: '42px', color: '#FFB6C1', margin: 0, textShadow: '0 0 20px rgba(255,105,180,0.8), 0 0 40px rgba(255,20,147,0.5)', lineHeight: 1.2 }}>
+        <p className="romantic-glow" style={{ fontFamily: "'Great Vibes', cursive", fontSize: '52px', color: '#FFD5E5', margin: 0, lineHeight: 1.2 }}>
           Happy Birthday, Selina
         </p>
-        <p style={{ fontFamily: "'Cormorant Infant', serif", fontStyle: 'italic', fontSize: '13px', color: 'rgba(255,182,193,0.6)', letterSpacing: '3px', margin: '4px 0 0 0' }}>
+        <p style={{ fontFamily: "'Cormorant Infant', serif", fontStyle: 'italic', fontSize: '15px', color: 'rgba(255,182,193,0.75)', letterSpacing: '4px', margin: '6px 0 0 0', textShadow: '0 0 12px rgba(255,105,180,0.5)' }}>
           with all my love
         </p>
       </div>
@@ -568,7 +569,7 @@ export default function GrandTreeApp() {
         <button onClick={() => setDebugMode(!debugMode)} style={{ padding: '12px 15px', backgroundColor: debugMode ? '#FF69B4' : 'rgba(0,0,0,0.5)', border: '1px solid #FF69B4', color: debugMode ? '#000' : '#FF69B4', fontFamily: 'sans-serif', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer', backdropFilter: 'blur(4px)' }}>
            {debugMode ? 'HIDE DEBUG' : 'DEBUG'}
         </button>
-        <button onClick={() => setSceneState(s => s === 'CHAOS' ? 'FORMED' : 'CHAOS')} style={{ padding: '12px 30px', backgroundColor: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,105,180,0.5)', color: '#FFB6C1', fontFamily: "'Cormorant Infant', serif", fontStyle: 'italic', fontSize: '16px', fontWeight: '600', letterSpacing: '2px', cursor: 'pointer', backdropFilter: 'blur(4px)' }}>
+        <button className="romantic-btn" onClick={() => setSceneState(s => s === 'CHAOS' ? 'FORMED' : 'CHAOS')} style={{ padding: '12px 34px', backgroundColor: 'rgba(20,0,15,0.6)', border: '1px solid rgba(255,105,180,0.55)', color: '#FFD5E5', fontFamily: "'Cormorant Infant', serif", fontStyle: 'italic', fontSize: '17px', fontWeight: '600', letterSpacing: '2px', cursor: 'pointer', backdropFilter: 'blur(8px)', borderRadius: '2px' }}>
            {sceneState === 'CHAOS' ? 'Bloom Heart' : 'Scatter Love'}
         </button>
       </div>
