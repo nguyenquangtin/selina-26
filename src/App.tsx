@@ -211,8 +211,8 @@ const PhotoOrnaments = ({ state }: { state: 'CHAOS' | 'FORMED' }) => {
             <mesh geometry={photoGeometry}>
               <meshStandardMaterial
                 map={textures[obj.textureIndex]}
-                roughness={0.5} metalness={0}
-                emissive={CONFIG.colors.white} emissiveMap={textures[obj.textureIndex]} emissiveIntensity={1.0}
+                roughness={0.1} metalness={0}
+                emissive={CONFIG.colors.white} emissiveMap={textures[obj.textureIndex]} emissiveIntensity={2.5}
                 side={THREE.FrontSide}
               />
             </mesh>
@@ -225,8 +225,8 @@ const PhotoOrnaments = ({ state }: { state: 'CHAOS' | 'FORMED' }) => {
             <mesh geometry={photoGeometry}>
               <meshStandardMaterial
                 map={textures[obj.textureIndex]}
-                roughness={0.5} metalness={0}
-                emissive={CONFIG.colors.white} emissiveMap={textures[obj.textureIndex]} emissiveIntensity={1.0}
+                roughness={0.1} metalness={0}
+                emissive={CONFIG.colors.white} emissiveMap={textures[obj.textureIndex]} emissiveIntensity={2.5}
                 side={THREE.FrontSide}
               />
             </mesh>
@@ -529,7 +529,7 @@ export default function GrandTreeApp() {
 
       {/* UI - Birthday Greeting — fades in only when heart is formed */}
       <div style={{
-        position: 'absolute', top: '20px', left: '50%',
+        position: 'absolute', top: '28%', left: '50%',
         transform: `translateX(-50%) translateY(${sceneState === 'FORMED' ? '0px' : '-12px'})`,
         zIndex: 10, textAlign: 'center', pointerEvents: 'none', whiteSpace: 'nowrap',
         opacity: sceneState === 'FORMED' ? 1 : 0,
